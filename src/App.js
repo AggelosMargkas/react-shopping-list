@@ -1,24 +1,34 @@
 import Header from './Header';
 import Content from './Content';
 import Footer from './Footer';
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import AddItem from './AddItem';
 import SearchItem from './SearchItem';
 
 function App() {
 
-  const [items, setItems] = useState(JSON.parse(localStorage.getItem('shoppinglist')));
+  const [items, setItems] = useState(JSON.parse(localStorage.getItem('shoppinglist')) || []);
   const [newItem, setNewItem] = useState('')
   const [search, setSearch] = useState('')
 
-  const setAndSaveItems = (newItems) => {
-    setItems(newItems);
-    localStorage.setItem('shoppinglist', JSON.stringify(newItems));
-  }
+  /* useEffect basically does something when a dependency is changing
+    An example use could be that you fetch an API when you reload a page
+    or for example when you change another component(e.g a map)
+    
+    Useful information regarding useEffect from the React man page.
 
+    1. useEffect is a Hook, so you can only call it at the top level of your component or your own Hooks. You can’t call it inside loops or conditions. If you need that, extract a new component and move the state into it.
+    
+    2. If you’re not trying to synchronize with some external system, you probably don’t need an Effect.
+    
+  */
+
+  useEffect(() => {
+  localStorage.setItem('shoppinglist', JSON.stringify(items));
+  }, [items])
   
   const addItem = (item) => {
-    /* Set the new id based on the lenght of the list. If the
+    /* Set the new id based on the length of the list. If the
        list is empty set id = 1. I don't think this is going to
        work properly if we delete and add many objects.
        TODO: test the id update.  */
@@ -26,8 +36,8 @@ function App() {
     const id = items.length ? items[items.length - 1].id + 1 : 1;
     const myNewItem = { id, checked: false, item };
     const listItems = [ ...items, myNewItem ];
-    setAndSaveItems(listItems);
-  }
+    setItems(listItems);
+    }
 
 
   const handleCheck = (id) => {
@@ -39,19 +49,19 @@ function App() {
       we use and anonymous function call it using as input the id of the
       item id.
       
-      We dont want to change the state directly
+      We don't want to change the state directly
       we use map that is a high state function.
     */
 
     const listItems = items.map((item) => item.id === id ? { ...item, checked:!item.checked } : item);
-    setAndSaveItems(listItems);
+    setItems(listItems);
   }
 
   const handleDelete = (id) => {
       /* Using the filter function to create a new array that has filtered out
       the item ids that ARE NOT equal to the one that we pass in. */
       const listItems = items.filter((item) => item.id != id);
-      setAndSaveItems(listItems);
+      setItems(listItems);
   }
 
 

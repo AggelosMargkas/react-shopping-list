@@ -6,10 +6,12 @@ import AddItem from './AddItem';
 import SearchItem from './SearchItem';
 
 function App() {
-
-  const [items, setItems] = useState(JSON.parse(localStorage.getItem('shoppinglist')) || []);
-  const [newItem, setNewItem] = useState('')
-  const [search, setSearch] = useState('')
+  const API_URL = 'http://localhost:3500/items'
+  
+  const [items, setItems] = useState([]);
+  const [newItem, setNewItem] = useState('');
+  const [search, setSearch] = useState('');
+  const [fetchError, setFetchError] = useState(null);
 
   /* useEffect basically does something when a dependency is changing
     An example use could be that you fetch an API when you reload a page
@@ -24,8 +26,19 @@ function App() {
   */
 
   useEffect(() => {
-  localStorage.setItem('shoppinglist', JSON.stringify(items));
-  }, [items])
+    const fetchItems = async () => {
+      try{
+        const response = await fetch(API_URL);
+        if (!response.ok) throw Error("Didn't receive data from source");    
+        const listItems = await response.json();
+        console.log(listItems);
+        setItems(listItems);
+      } catch (err){
+        setFetchError(err.message);
+      }
+    }
+    fetchItems();
+  }, [])
   
   const addItem = (item) => {
     /* Set the new id based on the length of the list. If the
@@ -60,7 +73,7 @@ function App() {
   const handleDelete = (id) => {
       /* Using the filter function to create a new array that has filtered out
       the item ids that ARE NOT equal to the one that we pass in. */
-      const listItems = items.filter((item) => item.id != id);
+      const listItems = items.filter((item) => item.id !== id);
       setItems(listItems);
   }
 
